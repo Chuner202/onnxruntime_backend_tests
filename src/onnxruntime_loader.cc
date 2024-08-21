@@ -33,6 +33,7 @@
 #include <thread>
 
 #include "onnxruntime_utils.h"
+#include "encr.cc"
 
 namespace triton { namespace backend { namespace onnxruntime {
 
