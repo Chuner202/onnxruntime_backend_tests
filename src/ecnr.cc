@@ -3,7 +3,7 @@
 #include <cstring>
 #include <iostream>
 
-#ifdef WINVER
+#ifdef _WIN32
 void encryptDecrypt(const wchar_t* toEncrypt, int strLength, const wchar_t* key, wchar_t* output)
 {
         int keyLength = wcslen(key);
