@@ -35,6 +35,8 @@
 #include "onnxruntime_utils.h"
 #include "encr.cc"
 
+#define testKey 559d8dd7bd06cbfe7e7b262523280d3923ae65633f842d29c5df529c13f5acdab66cd8887d38e8d77765aeea0c9a7efc
+
 namespace triton { namespace backend { namespace onnxruntime {
 
 std::unique_ptr<OnnxLoader> OnnxLoader::loader = nullptr;
