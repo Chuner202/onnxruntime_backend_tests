@@ -174,8 +174,12 @@ OnnxLoader::LoadSession(
 #ifdef _WIN32
   std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
   std::wstring ort_style_model_str = converter.from_bytes(model);
+  std::wchar_t* model_data;
+  //std::wchar_t* model_data = new wchar_t[model.size()]; real data from model (!is_path) or model file (is_path)
 #else
   const auto& ort_style_model_str = model;
+  char* model_data;
+  //char* model_data = new char[model.size()]; // real data from model (!is_path) or model file (is_path)
 #endif
   if (loader != nullptr) {
     {
@@ -195,16 +199,26 @@ OnnxLoader::LoadSession(
       std::lock_guard<std::mutex> ort_lk(ort_create_session_mu);
 
       if (!is_path) {
+#ifdef _WIN32
+  model_data = new wchar_t[model.size()];
+#else
+  model_data = new char[model.size];
+#endif
         status = ort_api->CreateSessionFromArray(
             loader->env_, ort_style_model_str.c_str(), model.size(),
             session_options, session);
       } else {
+        std::FILE* model_file = fopen(ort_style_model_str.c_str(), "r");
+        
         status = ort_api->CreateSession(
             loader->env_, ort_style_model_str.c_str(), session_options,
             session);
+        fclose(model_file);
       }
     }
 
+    delete [] model_data;
+  
     if (status != nullptr) {
       TryRelease(true);
     }
