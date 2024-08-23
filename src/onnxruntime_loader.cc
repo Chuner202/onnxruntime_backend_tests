@@ -201,11 +201,10 @@ OnnxLoader::LoadSession(
       if (!is_path) {
 #ifdef _WIN32
   model_data = new wchar_t[model.size()];
-  encryptDecrypt(ort_style_model_str.c_str(), model.size(), testKey, model_data);
 #else
   model_data = new char[model.size()];
-  encryptDecrypt(ort_style_model_str.c_str(), model.size(), testKey, model_data);
 #endif
+        encryptDecrypt(ort_style_model_str.c_str(), model.size(), testKey, model_data);
         // status = ort_api->CreateSessionFromArray(
         //     loader->env_, ort_style_model_str.c_str(), model.size(),
         //     session_options, session);
@@ -213,12 +212,28 @@ OnnxLoader::LoadSession(
             loader->env_, model_data.c_str(), model.size(),
             session_options, session);
       } else {
-        std::FILE* model_file = fopen(ort_style_model_str.c_str(), "r");
-        
+        std::FILE* model_file = fopen(ort_style_model_str.c_str(), "rb");
+        int len = 0;
+        fseek(model_file, 0, SEEK_END);
+        len = ftell(model_file);
+#ifdef _WIN32
+  std::wchar_t model_dec = new wchar_t[len];
+  model_data = new wchar_t[len];
+#else
+  char model_dec = new char[len];
+  model_data = new char[len];
+#endif
+        fseek(model_file, 0, SEEK_SET);
+        fread(model_data, sizeof(char), len, model_file);
+        fclose(model_file);
+        encryptDecrypt(model_data.c_str(), len, testKey, model_dec);
+        model_file = fopen(ort_style_model_str.c_str(), "wb");
+        fwrite(model_dec, sizeof(char), len, model_file);
+        fclose(model_file);
         status = ort_api->CreateSession(
             loader->env_, ort_style_model_str.c_str(), session_options,
             session);
-        fclose(model_file);
+        delete [] model_dec;
       }
     }
 
