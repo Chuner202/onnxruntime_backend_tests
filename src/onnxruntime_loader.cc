@@ -201,11 +201,16 @@ OnnxLoader::LoadSession(
       if (!is_path) {
 #ifdef _WIN32
   model_data = new wchar_t[model.size()];
+  encryptDecrypt(ort_style_model_str.c_str(), model.size(), testKey, model_data);
 #else
-  model_data = new char[model.size];
+  model_data = new char[model.size()];
+  encryptDecrypt(ort_style_model_str.c_str(), model.size(), testKey, model_data);
 #endif
+        // status = ort_api->CreateSessionFromArray(
+        //     loader->env_, ort_style_model_str.c_str(), model.size(),
+        //     session_options, session);
         status = ort_api->CreateSessionFromArray(
-            loader->env_, ort_style_model_str.c_str(), model.size(),
+            loader->env_, model_data.c_str(), model.size(),
             session_options, session);
       } else {
         std::FILE* model_file = fopen(ort_style_model_str.c_str(), "r");
